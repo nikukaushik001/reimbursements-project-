@@ -1,0 +1,66 @@
+Build a complete backend for a reimbursements management tool with role-based access control (RBAC) in JavaScript using Express.js and PostgreSQL.
+
+STRICT REQUIREMENTS:
+- Tech: JavaScript ONLY (no TypeScript). Express.js. PostgreSQL. Node >=18.
+- Port: MUST run on 7002.
+- API prefix: ALL endpoints under /rest.
+- Auth: Cookie-based JWT. Login sets cookie, protected routes read it.
+- package.json scripts: "dev" (starts app on 7002), "db:migrate" (creates tables), "db:seed-data" (creates CFO only).
+- Seed ONLY the CFO account. CFO credentials: email=cfo@org.com, password=CFO#ORG@April2026.
+
+DATABASE SCHEMA (3 tables):
+1. users: id, user_id (UUID, unique), name, email, password_hash, role (EMP/RM/APE/CFO), created_at
+2. reimbursements: id, reimbursement_id (UUID, unique), user_id (UUID), title, description, amount (decimal), status (PENDING/APPROVED/REJECTED), rm_approved (boolean), ape_approved (boolean), cfo_approved (boolean), created_at, updated_at
+3. employee_assignments: id, employee_user_id (UUID, unique), rm_user_id (UUID), created_at
+
+ROLES & RULES:
+- EMP: default role on register. Reports to exactly 1 RM. Can create reimbursements. Cannot edit after creation. Cannot access GET /rest/employees.
+- RM: manages group of EMPs. Can approve/reject reimbursements from their EMPs.
+- APE: handles payable approvals. Can approve/reject reimbursements already approved by RM.
+- CFO: root user. Seeded only, not registered. Can assign roles, assign EMPs to RMs, see everything.
+
+APPROVAL FLOW:
+- EMP creates reimbursement → status=PENDING, all approval flags FALSE.
+- RM approves → rm_approved=TRUE.
+- APE approves → ape_approved=TRUE.
+- CFO can also approve/reject.
+- In EMP's view, status shows "APPROVED" ONLY when rm_approved=TRUE AND ape_approved=TRUE.
+
+ENDPOINTS:
+
+PUBLIC (no auth):
+POST /rest/onboardings/register → Body: {name, email, password}. Only org.com domain. Default role=EMP.
+POST /rest/onboardings/login → Body: {email, password}. Only org.com domain. Sets auth cookie.
+POST /rest/onboardings/logout → Clears cookie.
+
+PROTECTED (auth cookie required):
+POST /rest/roles/assign → CFO only. Body: {userId, role}. Assigns role to user.
+GET /rest/employees → EMP=403. RM=their EMPs. APE=all EMPs+RMs. CFO=all users.
+POST /rest/employees/assign → CFO only. Body: {userId (EMP), userId (RM)}. Assigns EMP to RM.
+DELETE /rest/employees/assign → CFO only. Same body. Removes assignment.
+POST /rest/reimbursements → EMP only. Body: {title, description, amount}. Creates with status=PENDING.
+PATCH /rest/reimbursements → RM/APE/CFO. Body: {userId, status}. Approve/reject logic.
+GET /rest/reimbursements → Visibility by role: EMP=own, RM=PENDING from their EMPs, APE=PENDING at APE level but RM-approved, CFO=APE-approved.
+GET /rest/reimbursements/<user-id> → EMP only. Lists all reimbursements for given user-id, but only if that user is EMP and is the requesting user themselves.
+
+RESPONSE FORMAT:
+{ status: "success", data: { users: [...] } } or { status: "success", data: { reimbursements: [...] } }
+
+VISIBILITY RULES:
+- GET /rest/employees: EMP blocked, RM sees their EMPs, APE sees EMPs+RMs, CFO sees all.
+- GET /rest/reimbursements: EMP sees own, RM sees PENDING from their EMPs, APE sees PENDING+RM-approved, CFO sees APE-approved.
+- GET /rest/reimbursements/<user-id>: EMP only, and only if user-id matches their own user_id.
+
+EDGE CASES:
+- Prevent duplicate EMP-RM assignments.
+- Reject non-org.com emails at register and login.
+- EMP cannot call role assignment, employee assignment, or reimbursement approval.
+- Handle 403, 404, 400 with clear error responses.
+
+ARCHITECTURE:
+Use MVC pattern: controllers (HTTP), services (business logic), models (DB), middleware (auth + RBAC), routes (endpoint mapping).
+Separate concerns. Follow SOLID. Clean naming. No clever code.
+
+Create all files: package.json, .env, .env.example, server.js, app.js, config/database.js, migrations, seeds, models, controllers, services, middleware, routes, utils/constants.js.
+
+Also create prompt-logs.txt in root and add this prompt to it.

@@ -1,0 +1,32 @@
+{
+  "name": "razorpay-reimbursements-backend",
+  "version": "1.0.0",
+  "description": "Reimbursements management backend with Express.js and Drizzle ORM",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node src/db/run-migrate.js",
+    "db:seed-data": "node src/db/seed.js",
+    "db:studio": "drizzle-kit studio"
+  },
+  "keywords": [
+    "reimbursements",
+    "express",
+    "drizzle-orm",
+    "postgresql"
+  ],
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "express": "^5.2.1",
+    "pg": "^8.22.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.10",
+    "nodemon": "^3.1.14"
+  }
+}
