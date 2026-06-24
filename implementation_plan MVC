@@ -1,0 +1,52 @@
+# Express Backend Architecture Plan
+
+The database layer is complete and pushed. Now we need to set up the actual API server using Express.js. To ensure the codebase is clean, maintainable, and "looks good," we will use a standard, modular layered architecture.
+
+## Proposed Folder Structure
+
+We will organize the code by technical concern (Controllers, Routes, Middleware). This separates the business logic from the routing and configuration.
+
+```
+RazorPay Backend/
+├── src/
+│   ├── config/            # Configuration files (DB connection) [DONE]
+│   ├── db/                # Database schemas, migrations, seeds [DONE]
+│   │
+│   ├── controllers/       # Business logic for endpoints
+│   │   ├── auth.controller.js             # Handles login logic
+│   │   └── reimbursements.controller.js   # Handles creating/approving requests
+│   │
+│   ├── routes/            # Route definitions mapped to controllers
+│   │   ├── auth.routes.js
+│   │   └── reimbursements.routes.js
+│   │
+│   ├── middleware/        # Express middleware (Auth, Errors)
+│   │   ├── auth.middleware.js             # Verifies JWTs and Roles (EMP, RM, etc.)
+│   │   └── error.middleware.js            # Global error handler
+│   │
+│   ├── utils/             # Helper functions
+│   │   └── jwt.utils.js                   # Functions to sign and verify tokens
+│   │
+│   ├── app.js             # Express app configuration (CORS, body-parser, routes)
+│   └── index.js           # Server entry point (app.listen)
+```
+
+## Proposed Changes & Next Steps
+
+1.  **Core Setup (`app.js` & `index.js`)**:
+    *   Set up Express to run on port `7002` (as requested in earlier prompts).
+    *   Configure `cookie-parser` (for JWT cookies) and `express.json()`.
+    *   Prefix all API routes with `/rest`.
+2.  **Authentication Layer**:
+    *   Implement `/rest/auth/login` in `auth.controller.js`.
+    *   Verify password with `bcrypt`, generate a JWT, and set it as an HTTP-only cookie.
+3.  **Middleware**:
+    *   Create JWT validation middleware to protect endpoints.
+    *   Create Role-Based Access Control (RBAC) middleware to enforce role permissions (e.g., only `EMP` can create requests).
+4.  **Reimbursements API**:
+    *   Create endpoints for employees to submit and fetch their reimbursements.
+    *   Create endpoints for Managers, APEs, and the CFO to view and approve requests.
+
+> [!IMPORTANT]
+> **User Review Required**
+> Does this modular structure look good to you? Do you have any specific preferences for how the authentication token (JWT) is handled, or should I proceed with the standard secure HTTP-only cookie approach?
