@@ -14,11 +14,14 @@ const { ROLES } = require('../utils/constants');
 
 const router = Router();
 
+const { upload } = require('../middleware/upload.middleware');
+
 // POST — EMP creates a new reimbursement
 router.post(
   '/',
   authenticate,
   authorize(ROLES.EMP),
+  upload.single('receipt'),
   reimbursementController.createReimbursement
 );
 

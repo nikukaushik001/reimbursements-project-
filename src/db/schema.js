@@ -97,6 +97,9 @@ const reimbursements = pgTable('reimbursements', {
    */
   status: varchar('status', { length: 20 }).notNull().default('PENDING'),
 
+  /** Optional URL or path to an uploaded receipt. */
+  receiptUrl: varchar('receipt_url', { length: 500 }),
+
   /** Has the Reporting Manager approved? */
   rmApproved: boolean('rm_approved').notNull().default(false),
 

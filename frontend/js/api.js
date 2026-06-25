@@ -21,7 +21,12 @@ async function apiFetch(endpoint, method = 'GET', body = null) {
   };
 
   if (body) {
-    options.body = JSON.stringify(body);
+    if (body instanceof FormData) {
+      options.body = body;
+      delete options.headers['Content-Type']; // Let browser set multipart/form-data with boundaries
+    } else {
+      options.body = JSON.stringify(body);
+    }
   }
 
   const res = await fetch(`${API_BASE}${endpoint}`, options);
@@ -70,8 +75,15 @@ async function apiRemoveAssignment(employeeUserId, rmUserId) {
 
 // ── Reimbursements ─────────────────────────────────────────────────────────
 
-async function apiCreateReimbursement(title, description, amount) {
-  return apiFetch('/reimbursements', 'POST', { title, description, amount });
+async function apiCreateReimbursement(title, description, amount, receiptFile = null) {
+  const formData = new FormData();
+  formData.append('title', title);
+  formData.append('description', description);
+  formData.append('amount', amount);
+  if (receiptFile) {
+    formData.append('receipt', receiptFile);
+  }
+  return apiFetch('/reimbursements', 'POST', formData);
 }
 
 async function apiUpdateReimbursement(userId, status) {

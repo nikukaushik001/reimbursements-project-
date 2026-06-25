@@ -13,9 +13,13 @@ const reimbursementService = require('../services/reimbursement.service');
 const createReimbursement = async (req, res, next) => {
   try {
     const { title, description, amount } = req.body;
+    
+    // Construct public URL path if file was uploaded
+    const receiptUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
     const created = await reimbursementService.createReimbursement(
       req.user.userId,
-      { title, description, amount }
+      { title, description, amount, receiptUrl }
     );
 
     res.status(201).json({

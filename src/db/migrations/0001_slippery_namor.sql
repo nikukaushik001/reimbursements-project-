@@ -1,0 +1,1 @@
+ALTER TABLE "reimbursements" ADD COLUMN "receipt_url" varchar(500);

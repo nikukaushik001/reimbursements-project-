@@ -23,7 +23,7 @@ const { ROLES, STATUSES } = require('../utils/constants');
  * @param {Object} data   — { title, description, amount }
  * @returns {Object} The created reimbursement
  */
-const createReimbursement = async (userId, { title, description, amount }) => {
+const createReimbursement = async (userId, { title, description, amount, receiptUrl }) => {
   // 1. Validate fields
   if (!title || !description || amount === undefined || amount === null) {
     const error = new Error('title, description, and amount are required.');
@@ -45,6 +45,7 @@ const createReimbursement = async (userId, { title, description, amount }) => {
       title,
       description,
       amount: String(amount),
+      receiptUrl, // Optional file path
       status: STATUSES.PENDING,
       rmApproved: false,
       apeApproved: false,
@@ -216,6 +217,7 @@ const getReimbursements = async (requestingUser) => {
         title: reimbursements.title,
         description: reimbursements.description,
         amount: reimbursements.amount,
+        receiptUrl: reimbursements.receiptUrl,
         status: reimbursements.status,
         rmApproved: reimbursements.rmApproved,
         apeApproved: reimbursements.apeApproved,

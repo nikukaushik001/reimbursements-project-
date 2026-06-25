@@ -9,6 +9,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const path = require('path');
 
 // ── Route Modules ──────────────────────────────────────────────────────────
 const onboardingRoutes    = require('./routes/onboarding.routes');
@@ -29,6 +30,7 @@ app.use(cors({
 }));
 app.use(express.json()); // Parse JSON request bodies
 app.use(cookieParser());  // Parse cookies (for JWT auth)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'))); // Serve receipts
 
 // ── Health Check ───────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {

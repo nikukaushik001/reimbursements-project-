@@ -146,6 +146,10 @@ function renderCreateReimbursement(container) {
           <label for="reimb-amount">Amount (₹)</label>
           <input type="number" id="reimb-amount" placeholder="12500.00" step="0.01" min="1" required>
         </div>
+        <div class="form-group">
+          <label for="reimb-receipt">Receipt (Optional, max 5MB)</label>
+          <input type="file" id="reimb-receipt" accept="image/png, image/jpeg, application/pdf">
+        </div>
         <button type="submit" class="btn btn-primary btn-full">Submit Request</button>
       </form>
     </div>
@@ -157,10 +161,11 @@ function renderCreateReimbursement(container) {
     const title = $('#reimb-title').value.trim();
     const description = $('#reimb-description').value.trim();
     const amount = $('#reimb-amount').value;
+    const receiptFile = $('#reimb-receipt').files[0];
 
     setLoading(btn, true);
     try {
-      await apiCreateReimbursement(title, description, Number(amount));
+      await apiCreateReimbursement(title, description, Number(amount), receiptFile);
       showToast('Reimbursement request submitted!', 'success');
       e.target.reset();
     } catch (err) {
@@ -202,6 +207,7 @@ async function renderMyReimbursements(container) {
             <tr>
               <th>Title</th>
               <th>Amount</th>
+              <th>Receipt</th>
               <th>Status</th>
               <th>RM</th>
               <th>APE</th>
@@ -216,6 +222,9 @@ async function renderMyReimbursements(container) {
                   <div class="cell-desc">${r.description || ''}</div>
                 </td>
                 <td class="cell-amount">${formatCurrency(r.amount)}</td>
+                <td>
+                  ${r.receiptUrl ? `<a href="http://localhost:7002${r.receiptUrl}" target="_blank" title="View Receipt">📄 View</a>` : '<span class="text-secondary">—</span>'}
+                </td>
                 <td>${statusBadge(r.status)}</td>
                 <td>${r.rmApproved ? '✅' : '⏳'}</td>
                 <td>${r.apeApproved ? '✅' : '⏳'}</td>
@@ -265,6 +274,7 @@ async function renderPendingApprovals(container) {
               <th>Employee</th>
               <th>Title</th>
               <th>Amount</th>
+              <th>Receipt</th>
               <th>Status</th>
               <th>RM</th>
               <th>APE</th>
@@ -281,6 +291,9 @@ async function renderPendingApprovals(container) {
                   <div class="cell-desc">${r.description || ''}</div>
                 </td>
                 <td class="cell-amount">${formatCurrency(r.amount)}</td>
+                <td>
+                  ${r.receiptUrl ? `<a href="http://localhost:7002${r.receiptUrl}" target="_blank" title="View Receipt">📄 View</a>` : '<span class="text-secondary">—</span>'}
+                </td>
                 <td>${statusBadge(r.status)}</td>
                 <td>${r.rmApproved ? '✅' : '⏳'}</td>
                 <td>${r.apeApproved ? '✅' : '⏳'}</td>
