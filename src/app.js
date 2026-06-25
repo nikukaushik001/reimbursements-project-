@@ -31,6 +31,7 @@ app.use(cors({
 app.use(express.json()); // Parse JSON request bodies
 app.use(cookieParser());  // Parse cookies (for JWT auth)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'))); // Serve receipts
+app.use(express.static(path.join(__dirname, '../frontend'))); // Serve Frontend
 
 // ── Health Check ───────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {

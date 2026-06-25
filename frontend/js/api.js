@@ -5,7 +5,7 @@
  * Uses fetch() with credentials: 'include' so the auth cookie is sent.
  */
 
-const API_BASE = 'http://localhost:7002/rest';
+const API_BASE = '/rest';
 
 const defaultHeaders = { 'Content-Type': 'application/json' };
 const fetchOptions = { credentials: 'include' };
