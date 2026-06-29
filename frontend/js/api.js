@@ -97,3 +97,7 @@ async function apiGetReimbursements() {
 async function apiGetReimbursementsByUser(userId) {
   return apiFetch(`/reimbursements/${userId}`, 'GET');
 }
+
+async function apiGetAnalytics() {
+  return apiFetch('/reimbursements/analytics', 'GET');
+}

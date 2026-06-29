@@ -40,6 +40,14 @@ router.get(
   reimbursementController.getReimbursements
 );
 
+// GET /analytics — CFO only
+router.get(
+  '/analytics',
+  authenticate,
+  authorize(ROLES.CFO),
+  reimbursementController.getAnalytics
+);
+
 // GET /:userId — EMP self-view only
 router.get(
   '/:userId',

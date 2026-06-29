@@ -60,6 +60,7 @@ function getSectionsForRole(role) {
     'employee-list': { id: 'employee-list', icon: '👥', label: 'Employees' },
     'assign-role': { id: 'assign-role', icon: '🔑', label: 'Assign Role' },
     'assign-employee': { id: 'assign-employee', icon: '🔗', label: 'Assign EMP → RM' },
+    'analytics': { id: 'analytics', icon: '📊', label: 'Dashboard Overview' },
   };
 
   switch (role) {
@@ -71,6 +72,7 @@ function getSectionsForRole(role) {
       return [all['pending-approvals'], all['employee-list']];
     case 'CFO':
       return [
+        all['analytics'],
         all['pending-approvals'],
         all['employee-list'],
         all['assign-role'],
@@ -115,6 +117,9 @@ function showSection(sectionId) {
         break;
       case 'assign-employee':
         renderAssignEmployee(content);
+        break;
+      case 'analytics':
+        renderAnalyticsDashboard(content);
         break;
     }
     // Fade in
@@ -519,4 +524,88 @@ function renderAssignEmployee(container) {
       setLoading(btn, false);
     }
   });
+}
+
+// ── Section: Analytics Dashboard ───────────────────────────────────────────
+
+async function renderAnalyticsDashboard(container) {
+  container.innerHTML = `
+    <div class="section-header">
+      <h2>Dashboard Overview</h2>
+      <p class="section-desc">Company-wide reimbursement analytics</p>
+    </div>
+    
+    <div class="analytics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+      <div class="glass-card stat-card" style="padding: 1.5rem; text-align: center;">
+        <h3 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Total Approved Spend</h3>
+        <div id="stat-total-spent" style="font-size: 1.8rem; font-weight: 600; color: var(--success-color);">₹0</div>
+      </div>
+      <div class="glass-card stat-card" style="padding: 1.5rem; text-align: center;">
+        <h3 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Total Pending Approvals</h3>
+        <div id="stat-total-pending" style="font-size: 1.8rem; font-weight: 600; color: var(--warning-color);">0</div>
+      </div>
+      <div class="glass-card stat-card" style="padding: 1.5rem; text-align: center;">
+        <h3 style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Total Rejected Requests</h3>
+        <div id="stat-total-rejected" style="font-size: 1.8rem; font-weight: 600; color: var(--danger-color);">0</div>
+      </div>
+    </div>
+
+    <div class="glass-card chart-card" style="padding: 1.5rem; display: flex; justify-content: center; align-items: center; min-height: 400px;">
+      <div style="width: 100%; max-width: 500px;">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </div>
+  `;
+
+  try {
+    const res = await apiGetAnalytics();
+    const data = res.data.analytics;
+
+    // Update Summary Cards
+    $('#stat-total-spent').textContent = formatCurrency(data.totalSpent);
+    $('#stat-total-pending').textContent = data.countPending;
+    $('#stat-total-rejected').textContent = data.countRejected;
+
+    // Render Chart.js
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Approved', 'Pending', 'Rejected'],
+        datasets: [{
+          label: 'Requests by Status',
+          data: [data.countApproved, data.countPending, data.countRejected],
+          backgroundColor: [
+            'rgba(16, 185, 129, 0.8)', // Success green
+            'rgba(245, 158, 11, 0.8)', // Warning orange
+            'rgba(239, 68, 68, 0.8)'   // Danger red
+          ],
+          borderColor: [
+            'rgba(16, 185, 129, 1)',
+            'rgba(245, 158, 11, 1)',
+            'rgba(239, 68, 68, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: '#e2e8f0' } // Light text for dark mode
+          },
+          title: {
+            display: true,
+            text: 'Reimbursement Status Distribution',
+            color: '#f8fafc',
+            font: { size: 16 }
+          }
+        }
+      }
+    });
+
+  } catch (err) {
+    showToast('Failed to load analytics: ' + err.message, 'error');
+  }
 }

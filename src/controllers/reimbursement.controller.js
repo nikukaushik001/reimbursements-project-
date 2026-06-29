@@ -81,9 +81,24 @@ const getReimbursementsByUser = async (req, res, next) => {
   }
 };
 
+// ── GET /rest/reimbursements/analytics ─────────────────────────────────────
+const getAnalytics = async (req, res, next) => {
+  try {
+    const analytics = await reimbursementService.getAnalytics();
+
+    res.status(200).json({
+      status: 'success',
+      data: { analytics },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createReimbursement,
   updateReimbursement,
   getReimbursements,
   getReimbursementsByUser,
+  getAnalytics,
 };

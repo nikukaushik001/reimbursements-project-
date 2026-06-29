@@ -309,9 +309,53 @@ const getReimbursementsByUserId = async (requestingUser, targetUserId) => {
   }));
 };
 
+// ── Get Analytics (CFO only) ───────────────────────────────────────────────
+
+/**
+ * Returns aggregated analytics across all reimbursements for the CFO dashboard.
+ */
+const getAnalytics = async () => {
+  const allReimbursements = await db.select().from(reimbursements);
+
+  const analytics = {
+    totalSpent: 0,
+    totalPending: 0,
+    totalRejected: 0,
+    countApproved: 0,
+    countPending: 0,
+    countRejected: 0,
+  };
+
+  allReimbursements.forEach((r) => {
+    // Determine overall status based on the same logic used elsewhere
+    let finalStatus = STATUSES.PENDING;
+    if (r.rmApproved && r.apeApproved && r.cfoApproved) {
+      finalStatus = STATUSES.APPROVED;
+    } else if (r.status === STATUSES.REJECTED) {
+      finalStatus = STATUSES.REJECTED;
+    }
+
+    const amount = Number(r.amount);
+
+    if (finalStatus === STATUSES.APPROVED) {
+      analytics.totalSpent += amount;
+      analytics.countApproved += 1;
+    } else if (finalStatus === STATUSES.REJECTED) {
+      analytics.totalRejected += amount;
+      analytics.countRejected += 1;
+    } else {
+      analytics.totalPending += amount;
+      analytics.countPending += 1;
+    }
+  });
+
+  return analytics;
+};
+
 module.exports = {
   createReimbursement,
   updateReimbursement,
   getReimbursements,
   getReimbursementsByUserId,
+  getAnalytics,
 };
