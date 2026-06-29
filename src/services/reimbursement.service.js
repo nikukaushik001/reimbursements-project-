@@ -233,7 +233,8 @@ const getReimbursements = async (requestingUser) => {
       .where(
         and(
           eq(employeeAssignments.rmUserId, userId),
-          eq(reimbursements.status, STATUSES.PENDING)
+          eq(reimbursements.status, STATUSES.PENDING),
+          eq(reimbursements.rmApproved, false)
         )
       );
 
@@ -248,7 +249,8 @@ const getReimbursements = async (requestingUser) => {
       .where(
         and(
           eq(reimbursements.status, STATUSES.PENDING),
-          eq(reimbursements.rmApproved, true)
+          eq(reimbursements.rmApproved, true),
+          eq(reimbursements.apeApproved, false)
         )
       );
 
@@ -260,7 +262,13 @@ const getReimbursements = async (requestingUser) => {
     const results = await db
       .select()
       .from(reimbursements)
-      .where(eq(reimbursements.apeApproved, true));
+      .where(
+        and(
+          eq(reimbursements.status, STATUSES.PENDING),
+          eq(reimbursements.apeApproved, true),
+          eq(reimbursements.cfoApproved, false)
+        )
+      );
 
     return results;
   }
